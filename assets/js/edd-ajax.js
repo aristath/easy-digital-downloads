@@ -63,6 +63,19 @@ var eddHelper = {
 			item.style.display = 'none';
 		});
 		return this;
+	},
+
+	/**
+	 * Adds a class to the elements in this.el.
+	 *
+	 * @param {string} className - The class-name we want to add.
+	 * @returns {Object} - Returns the eddHelper object to allow chaining.
+	 */
+	addClass: function( className ) {
+		this.el.forEach( function( item ) {
+			item.classList.add( className );
+		});
+		return this;
 	}
 };
 
@@ -71,7 +84,7 @@ eddHelper.ready( function () {
 
 	// Hide unneeded elements. These are things that are required in case JS breaks or isn't present
 	eddHelper.init( '.edd-no-js' ).hide();
-	$('a.edd-add-to-cart').addClass('edd-has-js');
+	eddHelper.init( 'a.edd-add-to-cart' ).addClass( 'edd-has-js' );
 
 	// Send Remove from Cart requests
 	$(document.body).on('click.eddRemoveFromCart', '.edd-remove-from-cart', function (event) {
