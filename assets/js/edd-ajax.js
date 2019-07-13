@@ -54,6 +54,16 @@ var eddHelper = {
 	},
 
 	/**
+	 * Get the parent of a single element.
+	 *
+	 * @param {Object} el - A single element.
+	 * @returns {Object} - Returns the parent element.
+	 */
+	parent: function( el ) {
+		return el.parentNode;
+	},
+
+	/**
 	 * Hides the elements in this.el.
 	 *
 	 * @returns {Object} - Returns the eddHelper object to allow chaining.
