@@ -1,8 +1,76 @@
 var edd_scripts;
-jQuery(document).ready(function ($) {
+
+var eddHelper = {
+
+	/**
+	 * Emulates jQuery.ready().
+	 *
+	 * @param {function} fn - The function we want to run.
+	 * @returns {void}
+	 */
+	ready: function( fn ) {
+
+		// Sanity check.
+		if ( 'function' !== typeof fn ) {
+			return;
+		}
+
+		// If document is already loaded, run method.
+		if ( 'complete' === document.readyState ) {
+			return fn();
+		}
+
+		// Otherwise, wait until document is loaded.
+		document.addEventListener( 'DOMContentLoaded', fn, false );
+	},
+
+	/**
+	 * Init the object with a selector to facilitate jQuery-like behavior.
+	 *
+	 * @param {string} selector - The selector we're targetting.
+	 * @param {Object} parent - The parent element. Defaults to document if undefined.
+	 * @returns {Object} - Returns the eddHelper object to allow chaining.
+	 */
+	init: function( selector, parent ) {
+		this.selector = selector;
+		this.parent   = parent || document;
+		this.el       = this.getEls( this.selector, this.parent );
+		if ( ! this.el ) {
+			this.el = [];
+		}
+		return this;
+	},
+
+	/**
+	 * Get an array of elements.
+	 *
+	 * @param {string} selector - The selector we're targetting.
+	 * @param {Object} parent - The parent element. Defaults to document if undefined.
+	 * @returns {Array} - Returns the array of elements found in the DOM.
+	 */
+	getEls: function( selector, parent ) {
+		parent = parent || document;
+		return Array.prototype.slice.call( parent.querySelectorAll( selector ) );
+	},
+
+	/**
+	 * Hides the elements in this.el.
+	 *
+	 * @returns {Object} - Returns the eddHelper object to allow chaining.
+	 */
+	hide: function() {
+		this.el.forEach( function( item ) {
+			item.style.display = 'none';
+		});
+		return this;
+	}
+};
+
+eddHelper.ready( function () {
+	var $ = $ || jQuery;
 
 	// Hide unneeded elements. These are things that are required in case JS breaks or isn't present
-	$('.edd-no-js').hide();
+	eddHelper.init( '.edd-no-js' ).hide();
 	$('a.edd-add-to-cart').addClass('edd-has-js');
 
 	// Send Remove from Cart requests
@@ -50,7 +118,7 @@ jQuery(document).ready(function ($) {
 
 					// Check to see if the purchase form(s) for this download is present on this page
 					if( $( '[id^=edd_purchase_' + id + ']' ).length ) {
-						$( '[id^=edd_purchase_' + id + '] .edd_go_to_checkout' ).hide();
+						eddHelper.init( '[id^=edd_purchase_' + id + '] .edd_go_to_checkout' ).hide();
 						$( '[id^=edd_purchase_' + id + '] a.edd-add-to-cart' ).show().removeAttr('data-edd-loading');
 						if ( edd_scripts.quantities_enabled == '1' ) {
 							$( '[id^=edd_purchase_' + id + '] .edd_download_quantity_wrapper' ).show();
@@ -67,7 +135,7 @@ jQuery(document).ready(function ($) {
 					$('.cart_item.edd_total span').html( response.total );
 
 					if( response.cart_quantity == 0 ) {
-						$('.cart_item.edd_subtotal,.edd-cart-number-of-items,.cart_item.edd_checkout,.cart_item.edd_cart_tax,.cart_item.edd_total').hide();
+						eddHelper.init('.cart_item.edd_subtotal,.edd-cart-number-of-items,.cart_item.edd_checkout,.cart_item.edd_cart_tax,.cart_item.edd_total').hide();
 						$('.edd-cart').each( function() {
 
 							var cart_wrapper = $(this).parent();
@@ -204,7 +272,7 @@ jQuery(document).ready(function ($) {
 					$('.cart_item.edd_checkout').show();
 
 					if ($('.cart_item.empty').length) {
-						$('.cart_item.empty').hide();
+						eddHelper.init('.cart_item.empty').hide();
 					}
 
 					$('.widget_edd_cart_widget .edd-cart').each( function( cart ) {
@@ -255,7 +323,7 @@ jQuery(document).ready(function ($) {
 					// Update all buttons for same download
 					if( $( '.edd_download_purchase_form' ).length && ( variable_price == 'no' || ! form.find('.edd_price_option_' + download).is('input:hidden') ) ) {
 						var parent_form = $('.edd_download_purchase_form *[data-download-id="' + download + '"]').parents('form');
-						$( 'a.edd-add-to-cart', parent_form ).hide();
+						eddHelper.init( 'a.edd-add-to-cart', parent_form ).hide();
 						if( price_mode != 'multi' ) {
 							parent_form.find('.edd_download_quantity_wrapper').slideUp();
 						}
@@ -303,7 +371,7 @@ jQuery(document).ready(function ($) {
 			$('#edd_checkout_login_register').html(edd_scripts.loading);
 			$('#edd_checkout_login_register').html(checkout_response);
 			// Hide the ajax loader
-			$('.edd-cart-ajax').hide();
+			eddHelper.init('.edd-cart-ajax').hide();
 		});
 		return false;
 	});
@@ -408,13 +476,13 @@ jQuery(document).ready(function ($) {
 		$.post(edd_global_vars.ajaxurl, $('#edd_purchase_form').serialize() + '&action=edd_process_checkout&edd_ajax=true', function(data) {
 			if ( $.trim(data) == 'success' ) {
 				$('.edd_errors').remove();
-				$('.edd-error').hide();
+				eddHelper.init('.edd-error').hide();
 				$(eddPurchaseform).submit();
 			} else {
 				$('#edd-purchase-button').val(complete_purchase_val);
 				$('.edd-loading-ajax').remove();
 				$('.edd_errors').remove();
-				$('.edd-error').hide();
+				eddHelper.init('.edd-error').hide();
 				$( edd_global_vars.checkout_error_anchor ).before(data);
 				$('#edd-purchase-button').prop( 'disabled', false );
 
@@ -526,7 +594,7 @@ function edd_load_gateway( payment_mode ) {
 	jQuery.post(url, { action: 'edd_load_gateway', edd_payment_mode: payment_mode, nonce: nonce },
 		function(response){
 			jQuery('#edd_purchase_form_wrap').html(response);
-			jQuery('.edd-no-js').hide();
+			eddHelper.init('.edd-no-js').hide();
 			jQuery('body').trigger('edd_gateway_loaded', [ payment_mode ]);
 		}
 	);
