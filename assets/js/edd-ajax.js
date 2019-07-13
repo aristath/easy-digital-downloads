@@ -138,8 +138,9 @@ eddHelper.ready( function () {
 					}
 
 					// Remove the selected cart item
-					$('.edd-cart').each( function() {
-						$(this).find("[data-cart-item='" + item + "']").parent().remove();
+					eddHelper.init( '.edd-cart' ).each( function( item ) {
+						var parentEl = eddHelper.init( "[data-cart-item='" + item + "']", item ).parent();
+						parentEl.parentNode.removeChild( parentEl );
 					});
 
 					//Reset the data-cart-item attributes to match their new values in the EDD session cart array
@@ -171,15 +172,17 @@ eddHelper.ready( function () {
 
 					if( response.cart_quantity == 0 ) {
 						eddHelper.init('.cart_item.edd_subtotal,.edd-cart-number-of-items,.cart_item.edd_checkout,.cart_item.edd_cart_tax,.cart_item.edd_total').hide();
-						$('.edd-cart').each( function() {
-
-							var cart_wrapper = $(this).parent();
-							if ( cart_wrapper ) {
-								cart_wrapper.addClass('cart-empty')
-								cart_wrapper.removeClass('cart-not-empty');
+						eddHelper.init( '.edd-cart' ).each( function( item ) {
+							var newLi = document.createElement( 'li' );
+							if ( item.parentNode ) {
+								item.parentNode.classList.add( 'cart-empty' );
+								item.parentNode.classList.add( 'cart-not-empty' );
 							}
 
-							$(this).append('<li class="cart_item empty">' + edd_scripts.empty_cart_message + '</li>');
+							newLi.classList.add( 'cart_item' );
+							newLi.classList.add( 'empty' );
+							newLi.innerHTML = edd_scripts.empty_cart_message;
+							item.appendChild( newLi );
 						});
 					}
 
@@ -310,7 +313,7 @@ eddHelper.ready( function () {
 						eddHelper.init('.cart_item.empty').hide();
 					}
 
-					$('.widget_edd_cart_widget .edd-cart').each( function( cart ) {
+					document.querySelectorAll( '.widget_edd_cart_widget .edd-cart' ).forEach( function( cart ) {
 
 						var target = $(this).find('.edd-cart-meta:first');
 						$(response.cart_item).insertBefore(target);
