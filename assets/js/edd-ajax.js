@@ -64,6 +64,18 @@ var eddHelper = {
 	},
 
 	/**
+	 * Loop elements from this.el and run a function on each one of them.
+	 *
+	 * @param {function} fn - The function we want to run.
+	 * @returns {void}
+	 */
+	each: function( fn ) {
+		this.el.forEach( function( item, index ) {
+			fn( item, index );
+		});
+	},
+
+	/**
 	 * Hides the elements in this.el.
 	 *
 	 * @returns {Object} - Returns the eddHelper object to allow chaining.
